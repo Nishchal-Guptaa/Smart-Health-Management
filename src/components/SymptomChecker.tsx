@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowUp,
@@ -19,8 +18,6 @@ import {
   Clock,
 } from "lucide-react";
 
-
-
 interface ChatMessage {
   id: number;
   type: "user" | "bot";
@@ -29,17 +26,17 @@ interface ChatMessage {
 }
 
 const SymptomChecker = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      type: "bot",
-      message:
-        "Hello! I'm your AI health assistant. I can help you understand your symptoms and provide preliminary guidance. Please describe what you're experiencing.",
-      timestamp: "Just now",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([{
+    id: 1,
+    type: "bot",
+    message:
+      "Hello! I'm your AI health assistant. I can help you understand your symptoms and provide preliminary guidance. Please describe what you're experiencing.",
+    timestamp: "Just now",
+  }]);
+
   const [inputMessage, setInputMessage] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const urgencyLevels = [
     {
@@ -119,22 +116,25 @@ const SymptomChecker = () => {
     }
   };
 
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white p-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              AI Symptom Checker
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">AI Symptom Checker</h1>
             <p className="text-gray-600 mt-2">
-              Get preliminary diagnosis and health guidance from our AI
-              assistant
+              Get preliminary diagnosis and health guidance from our AI assistant
             </p>
           </div>
           <Button
             variant="outline"
-            onClick={() => window.location.href = "/"}
+            onClick={() => (window.location.href = "/")}
             className="flex items-center space-x-2"
           >
             <ArrowUp className="w-4 h-4" />
@@ -156,51 +156,60 @@ const SymptomChecker = () => {
               </CardHeader>
 
               <CardContent className="flex-1 flex flex-col">
-                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.type === "user"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
+                <div className="flex-1 overflow-hidden">
+                  <div
+                    className="h-[450px] overflow-y-auto pr-2 space-y-4"
+                    ref={scrollContainerRef}
+                  >
+                    {messages.map((message) => (
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        key={message.id}
+                        className={`flex ${
                           message.type === "user"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 text-gray-900"
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        <p>{message.message}</p>
-                        <p
-                          className={`text-xs mt-1 ${
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                             message.type === "user"
-                              ? "text-blue-200"
-                              : "text-gray-500"
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 text-gray-900"
                           }`}
                         >
-                          {message.timestamp}
-                        </p>
+                          <p>{message.message}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              message.type === "user"
+                                ? "text-blue-200"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {message.timestamp}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex space-x-2">
-                  <Input
+                <div className="flex gap-2 items-end mt-2">
+                  <textarea
                     placeholder="Describe your symptoms..."
                     value={inputMessage}
+                    rows={2}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleSendMessage()
-                    }
-                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    className="medical-gradient text-white"
+                    className="medical-gradient text-white h-10"
                   >
                     Send
                   </Button>
@@ -285,10 +294,10 @@ const SymptomChecker = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button className="w-full" variant="outline">
-                  🚨 Emergency Services
+                  🎉 Emergency Services
                 </Button>
                 <Button className="w-full" variant="outline">
-                  📅 Book Appointment
+                  🗓 Book Appointment
                 </Button>
                 <Button className="w-full" variant="outline">
                   🏥 Find Nearby Hospitals
