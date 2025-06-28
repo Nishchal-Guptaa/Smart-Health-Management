@@ -11,6 +11,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import PatientDashboard from "./components/PatientDashboard";
 import DoctorDashboard from "./components/DoctorDashboard";
+import AppointmentBooking from "@/components/AppointmentBooking";
+import SymptomChecker from "@/components/SymptomChecker";
+import TestBooking from "@/components/TestBooking";
+import EmergencyServices from "@/components/EmergencyServices";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +32,11 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard/patient" element={<PatientDashboard />} />
             <Route path="/dashboard/doctor" element={<DoctorDashboard />} />
+            <Route path="/appointments" element={<AppointmentBooking />} />
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
+<Route path="/test-booking" element={<TestBooking />} />
+<Route path="/ambulance" element={<EmergencyServices />} />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

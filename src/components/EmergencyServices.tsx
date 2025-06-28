@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, Phone, MapPin, Clock, Hospital, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface EmergencyServicesProps {
-  onClose: () => void;
-}
 
-const EmergencyServices = ({ onClose }: EmergencyServicesProps) => {
+const EmergencyServices = () => {
   const [activeEmergency, setActiveEmergency] = useState(false);
   const [ambulanceETA, setAmbulanceETA] = useState(8);
 
@@ -215,10 +213,10 @@ const EmergencyServices = ({ onClose }: EmergencyServicesProps) => {
             <h1 className="text-3xl font-bold text-gray-900">Emergency Services</h1>
             <p className="text-gray-600 mt-2">24/7 emergency response with live tracking and priority dispatch</p>
           </div>
-          <Button variant="outline" onClick={onClose} className="flex items-center space-x-2">
-            <ArrowUp className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Button>
+          <Link to="/dashboard/patient" className="flex items-center space-x-2 text-gray-700 hover:underline">
+                      <ArrowUp className="w-4 h-4" />
+                      <span>Back to Dashboard</span>
+                    </Link>
         </div>
 
         {/* Emergency Alert */}

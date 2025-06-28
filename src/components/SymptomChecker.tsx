@@ -5,10 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, MessageCircle, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface SymptomCheckerProps {
-  onClose: () => void;
-}
 
 interface ChatMessage {
   id: number;
@@ -17,7 +15,7 @@ interface ChatMessage {
   timestamp: string;
 }
 
-const SymptomChecker = ({ onClose }: SymptomCheckerProps) => {
+const SymptomChecker = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
@@ -102,10 +100,10 @@ const SymptomChecker = ({ onClose }: SymptomCheckerProps) => {
             <h1 className="text-3xl font-bold text-gray-900">AI Symptom Checker</h1>
             <p className="text-gray-600 mt-2">Get preliminary diagnosis and health guidance from our AI assistant</p>
           </div>
-          <Button variant="outline" onClick={onClose} className="flex items-center space-x-2">
+          <Link to="/dashboard/patient" className="flex items-center space-x-2 text-gray-700 hover:underline">
             <ArrowUp className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Button>
+            <span>Back to Dashboard</span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
