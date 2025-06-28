@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 
 # Load .env
-path = r"C:\Users\nishc\Desktop\Projects\Python\.env"
+path = r"C:\Users\...\Projects\Python\.env"
 load_dotenv(path)
 
 # Configure Gemini
