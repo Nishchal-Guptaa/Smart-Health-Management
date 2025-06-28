@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,51 +10,27 @@ interface AppointmentBookingProps {
   onClose: () => void;
 }
 
+interface Doctor {
+  id: number;
+  name: string;
+  specialty: string;
+  rating: number;
+  experience: string;
+  fee: string;
+  surge_fee: string;
+  distance: string;
+  next_slot: string;
+  availability: string;
+  image_url: string;
+}
+
 const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. Sarah Johnson",
-      specialty: "Cardiologist",
-      rating: 4.9,
-      experience: "15 years",
-      fee: "$150",
-      surgeFee: "$180",
-      distance: "2.3 km",
-      nextSlot: "Today 3:30 PM",
-      availability: "high",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face"
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Chen",
-      specialty: "Neurologist",
-      rating: 4.8,
-      experience: "12 years",
-      fee: "$200",
-      surgeFee: "$250",
-      distance: "1.8 km",
-      nextSlot: "Tomorrow 10:00 AM",
-      availability: "medium",
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face"
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Rodriguez",
-      specialty: "Dermatologist",
-      rating: 4.9,
-      experience: "10 years",
-      fee: "$120",
-      surgeFee: "$140",
-      distance: "3.1 km",
-      nextSlot: "Today 5:45 PM",
-      availability: "low",
-      image: "https://images.unsplash.com/photo-1594824483509-8f8c5a3f8e9b?w=400&h=400&fit=crop&crop=face"
-    }
-  ];
+  const SERVER_BASE_URL = "http://localhost:4000";
 
   const specialties = ["Cardiology", "Neurology", "Dermatology", "Orthopedics", "Pediatrics", "Psychiatry"];
 
@@ -67,6 +42,42 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
       default: return "bg-gray-100 text-gray-700";
     }
   };
+
+  const fetchDoctors = async () => {
+    setLoading(true);
+
+    try {
+      // 1. Send input to /input/search
+      await fetch(`${SERVER_BASE_URL}/input/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          specialty: selectedSpecialty,
+          location: searchLocation
+        })
+      });
+
+      // 2. Fetch output from /output/search
+      const response = await fetch(`${SERVER_BASE_URL}/output/search`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setDoctors(data.doctors || []);
+      } else {
+        console.error("Output error:", data.error);
+      }
+    } catch (err) {
+      console.error("Request failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSpecialty || searchLocation) {
+      fetchDoctors();
+    }
+  }, [selectedSpecialty, searchLocation]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
@@ -108,7 +119,7 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">Location</label>
                 <Input
@@ -117,12 +128,12 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
                   onChange={(e) => setSearchLocation(e.target.value)}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2">Sort By</label>
-                <Select>
+                <Select disabled>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder="Sort by (coming soon)" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="distance">Nearest First</SelectItem>
@@ -137,62 +148,66 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
         </Card>
 
         {/* Doctor Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {doctors.map((doctor) => (
-            <Card key={doctor.id} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <CardHeader className="pb-4">
-                <div className="flex items-start space-x-4">
-                  <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{doctor.name}</CardTitle>
-                    <CardDescription>{doctor.specialty}</CardDescription>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant="secondary">⭐ {doctor.rating}</Badge>
-                      <Badge className={getAvailabilityColor(doctor.availability)}>
-                        {doctor.availability} availability
-                      </Badge>
+        {loading ? (
+          <p className="text-center text-gray-500">Loading doctors...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {doctors.map((doctor) => (
+              <Card key={doctor.id} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start space-x-4">
+                    <img
+                      src={doctor.image_url}
+                      alt={doctor.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{doctor.name}</CardTitle>
+                      <CardDescription>{doctor.specialty}</CardDescription>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Badge variant="secondary">⭐ {doctor.rating}</Badge>
+                        <Badge className={getAvailabilityColor(doctor.availability)}>
+                          {doctor.availability} availability
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span>{doctor.experience}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span>{doctor.distance}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-lg font-semibold text-gray-900">{doctor.fee}</div>
-                    <div className="text-sm text-red-600">Surge: {doctor.surgeFee}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1 text-green-600">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-sm">{doctor.nextSlot}</span>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <span>{doctor.experience}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span>{doctor.distance}</span>
                     </div>
                   </div>
-                </div>
-                
-                <Button className="w-full medical-gradient text-white">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Appointment
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold text-gray-900">{doctor.fee}</div>
+                      <div className="text-sm text-red-600">Surge: {doctor.surge_fee}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center space-x-1 text-green-600">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm">{doctor.next_slot}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button className="w-full medical-gradient text-white">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Book Appointment
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* AI Features Banner */}
         <Card className="mt-8 bg-gradient-to-r from-blue-600 to-green-600 text-white">
