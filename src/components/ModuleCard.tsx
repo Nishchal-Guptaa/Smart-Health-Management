@@ -55,7 +55,7 @@ const ModuleCard = ({ module, index, onClick }: ModuleCardProps) => {
           ))}
         </div>
         
-        <Button 
+        {/* <Button 
           className="w-full medical-gradient text-white group-hover:shadow-lg transition-all duration-300"
           onClick={(e) => {
             e.stopPropagation();
@@ -63,7 +63,7 @@ const ModuleCard = ({ module, index, onClick }: ModuleCardProps) => {
           }}
         >
           Explore Now
-        </Button>
+        </Button> */}
       </CardContent>
     </Card>
   );
