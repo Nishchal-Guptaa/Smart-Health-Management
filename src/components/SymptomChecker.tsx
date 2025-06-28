@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import {
   ArrowUp,
   MessageCircle,
@@ -18,6 +19,10 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react";
+=======
+import { ArrowUp, MessageCircle, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
+>>>>>>> 92498ecc8e161ba863b674d60c89dd132675cb97
 
 
 interface ChatMessage {
@@ -131,14 +136,18 @@ const SymptomChecker = () => {
               assistant
             </p>
           </div>
+<<<<<<< HEAD
           <Button
             variant="outline"
             onClick={() => window.location.href = "/"}
             className="flex items-center space-x-2"
           >
+=======
+          <Link to="/dashboard/patient" className="flex items-center space-x-2 text-gray-700 hover:underline">
+>>>>>>> 92498ecc8e161ba863b674d60c89dd132675cb97
             <ArrowUp className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Button>
+            <span>Back to Dashboard</span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

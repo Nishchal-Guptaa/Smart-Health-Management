@@ -122,7 +122,17 @@ const Signup = () => {
       };
 
       await signUp(formData.email, password, userData, userType);
-      navigate("/login");
+
+// Optional: store user type locally for later use (e.g., on login redirect)
+localStorage.setItem("user_type", userType);
+
+// Redirect based on type
+if (userType === "doctor") {
+  navigate("/dashboard/doctor");
+} else {
+  navigate("/dashboard/patient");
+}
+
     } catch (error) {
       // Error handling is done in the useAuth hook
     }

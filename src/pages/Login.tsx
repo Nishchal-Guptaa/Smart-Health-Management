@@ -38,7 +38,7 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      navigate(userType === "doctor" ? "/doctor-dashboard" : "/");
+      navigate(userType === "doctor" ? "/dashboard/doctor" : "/dashboard/patient");
     } catch (error) {
       // Error handling is done in the useAuth hook
     }
