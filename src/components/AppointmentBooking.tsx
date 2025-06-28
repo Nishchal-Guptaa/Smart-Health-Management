@@ -1,14 +1,32 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Button,
+} from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowUp, Calendar, Clock, MapPin, User, Search } from "lucide-react";
-import { useUserData } from '@/hooks/useUserData';
-
-
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowUp,
+  Calendar,
+  MapPin,
+  User,
+  Search,
+  X,
+} from "lucide-react";
+import { useUserData } from "@/hooks/useUserData";
 
 interface Doctor {
   id: string;
@@ -36,47 +54,23 @@ const AppointmentBooking = () => {
   const [searchLocation, setSearchLocation] = useState("");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
-  
-  const SERVER_BASE_URL = "http://localhost:4000"; // update accordingly
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const SERVER_BASE_URL = "http://localhost:4000";
   const { userId } = useUserData();
-  const patientId = userId; // Replace with actual logged-in user ID
-  
+  const patientId = userId;
+
   const specialties = [
-    "Cardiology", "Neurology", "Dermatology", "Orthopedics", "Pediatrics", "Psychiatry"
+    "Cardiology",
+    "Neurology",
+    "Dermatology",
+    "Orthopedics",
+    "Pediatrics",
+    "Psychiatry",
   ];
-
-
-  const bookAppointment = async (doctorId: string) => {
-
-    const payload = {
-      doctor_id: doctorId,
-      patient_id: patientId,
-      appointment_date: new Date().toISOString().split("T")[0], // today
-      appointment_time: "10:00:00", // default time
-      status: "Scheduled",
-      reason: "General Checkup", // replace with user input later
-      notes: "",
-    };
-
-    try {
-      const response = await fetch(`${SERVER_BASE_URL}/appointments/book`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        alert("Appointment booked successfully!");
-      } else {
-        alert(`Failed to book: ${result.error}`);
-      }
-    } catch (err) {
-      console.error("Booking failed:", err);
-      alert("Something went wrong.");
-    }
-  };
-
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -86,8 +80,8 @@ const AppointmentBooking = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           specialty: selectedSpecialty,
-          location: searchLocation
-        })
+          location: searchLocation,
+        }),
       });
 
       const response = await fetch(`${SERVER_BASE_URL}/output/search`);
@@ -110,18 +104,60 @@ const AppointmentBooking = () => {
     }
   }, [selectedSpecialty, searchLocation]);
 
+  const bookAppointment = async () => {
+    if (!selectedDoctor || !appointmentDate || !appointmentTime) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const payload = {
+      doctor_id: selectedDoctor.id,
+      patient_id: patientId,
+      appointment_date: appointmentDate,
+      appointment_time: appointmentTime,
+      status: "Scheduled",
+      reason: "General Checkup",
+      notes: notes,
+    };
+
+    try {
+      const response = await fetch(`${SERVER_BASE_URL}/appointments/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Appointment booked successfully!");
+        setSelectedDoctor(null);
+      } else {
+        alert(`Failed to book: ${result.error}`);
+      }
+    } catch (err) {
+      console.error("Booking failed:", err);
+      alert("Something went wrong.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 relative">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Smart Appointment Scheduling</h1>
-            <p className="text-gray-600 mt-2">Find and book appointments with AI-powered doctor discovery</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Smart Appointment Scheduling
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Find and book appointments with AI-powered doctor discovery
+            </p>
           </div>
-          <Button variant="outline"
-            onClick={() => window.location.href = "/"}
-            className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => (window.location.href = "/")}
+            className="flex items-center space-x-2"
+          >
             <ArrowUp className="w-4 h-4" />
             <span>Back to Home</span>
           </Button>
@@ -138,8 +174,13 @@ const AppointmentBooking = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Specialty</label>
-                <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                <label className="block text-sm font-medium mb-2">
+                  Specialty
+                </label>
+                <Select
+                  value={selectedSpecialty}
+                  onValueChange={setSelectedSpecialty}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select specialty" />
                   </SelectTrigger>
@@ -153,7 +194,9 @@ const AppointmentBooking = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Location</label>
+                <label className="block text-sm font-medium mb-2">
+                  Location
+                </label>
                 <Input
                   placeholder="Enter location"
                   value={searchLocation}
@@ -161,7 +204,9 @@ const AppointmentBooking = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Sort By</label>
+                <label className="block text-sm font-medium mb-2">
+                  Sort By
+                </label>
                 <Select disabled>
                   <SelectTrigger>
                     <SelectValue placeholder="Sort (coming soon)" />
@@ -182,14 +227,20 @@ const AppointmentBooking = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {doctors.map((doctor) => (
-              <Card key={doctor.id} className="hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <Card
+                key={doctor.id}
+                className="hover:shadow-xl transition-all transform hover:-translate-y-1"
+              >
                 <CardHeader className="pb-4">
                   <div className="flex items-start space-x-4">
                     <div className="w-16 h-16 rounded-full bg-gray-200 text-center pt-4 font-bold text-gray-500">
-                      {doctor.first_name[0]}{doctor.last_name[0]}
+                      {doctor.first_name[0]}
+                      {doctor.last_name[0]}
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{doctor.first_name} {doctor.last_name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {doctor.first_name} {doctor.last_name}
+                      </CardTitle>
                       <CardDescription>{doctor.specialization}</CardDescription>
                       <div className="flex items-center space-x-2 mt-2">
                         <Badge variant="secondary">{doctor.gender}</Badge>
@@ -215,15 +266,17 @@ const AppointmentBooking = () => {
                         ${doctor.consultation_fee}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Available: {doctor.available_days}, {doctor.available_hours}
+                        Available: {doctor.available_days},{" "}
+                        {doctor.available_hours}
                       </div>
                     </div>
-                    <Button className="medical-gradient text-white"
-                      onClick={() => bookAppointment(doctor.id)}>
+                    <Button
+                      className="medical-gradient text-white"
+                      onClick={() => setSelectedDoctor(doctor)}
+                    >
                       <Calendar className="w-4 h-4 mr-2" />
                       Book Appointment
                     </Button>
-
                   </div>
                 </CardContent>
               </Card>
@@ -231,6 +284,71 @@ const AppointmentBooking = () => {
           </div>
         )}
       </div>
+
+      {/* Overlay Booking Form */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              onClick={() => setSelectedDoctor(null)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <CardTitle className="text-xl mb-2">
+              Book Appointment with Dr. {selectedDoctor.first_name}{" "}
+              {selectedDoctor.last_name}
+            </CardTitle>
+            <CardDescription className="mb-4">
+              Please fill in the appointment details
+            </CardDescription>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Appointment Date
+                </label>
+                <Input
+                  type="date"
+                  value={appointmentDate}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Appointment Time
+                </label>
+                <Input
+                  type="time"
+                  value={appointmentTime}
+                  onChange={(e) => setAppointmentTime(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Notes (optional)
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Any specific concerns?"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-4 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedDoctor(null)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={bookAppointment} className="medical-gradient text-white">
+                Confirm Booking
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
