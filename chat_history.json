@@ -8,19 +8,7 @@
   {
     "role": "model",
     "parts": [
-      "Hello there! How can I help you today? Please feel free to tell me about any health concerns or questions you might have.\n\n*Disclaimer: Please remember that I am an AI medical assistant and not a medical doctor. The information I provide is for general knowledge and informational purposes only, and does not constitute medical advice. Always consult with a qualified healthcare professional for any health concerns or before making any decisions related to your health or treatment.*"
-    ]
-  },
-  {
-    "role": "user",
-    "parts": [
-      "dhjd"
-    ]
-  },
-  {
-    "role": "model",
-    "parts": [
-      "It seems like that might have been a typo. Don't worry about it!\n\nIf you have any health questions or concerns you'd like to discuss, please feel free to tell me. I'm here to help in a friendly and professional manner.\n\n*Disclaimer: Please remember that I am an AI medical assistant and not a medical doctor. The information I provide is for general knowledge and informational purposes only, and does not constitute medical advice. Always consult with a qualified healthcare professional for any health concerns or before making any decisions related to your health or treatment.*"
+      "Hello there! I'm an AI medical assistant, and I'm here to help answer general questions you might have about health and wellness, or symptoms you might be experiencing.\n\nHow can I help you today? Please feel free to tell me what's on your mind."
     ]
   }
 ]
