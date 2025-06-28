@@ -2,8 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowDown, BellIcon, ShieldCheck, UsersIcon, StethoscopeIcon, ClockIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#e8f1fc] via-white to-[#e6fdf1]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
@@ -90,7 +93,7 @@ const HeroSection = () => {
                   </div>
                 </div>
 
-                <Button className="w-full medical-gradient text-white">
+                <Button className="w-full medical-gradient text-white" onClick={() => navigate("/dashboard/patient")}>
                   View Full Dashboard
                 </Button>
               </div>
