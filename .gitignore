@@ -26,3 +26,5 @@ __pycache__
 *.njsproj
 *.sln
 *.sw?
+extracted_data.json
+chat_history.json
