@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Supabase client
+// Supabase client setup
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -15,15 +15,21 @@ const supabase = createClient(
 
 let lastSearchResults = [];
 
-// POST /input/search — triggers the query
+// POST /input/search — store search query, query Supabase
 app.post('/input/search', async (req, res) => {
   const { specialty, location } = req.body;
 
   try {
     let query = supabase.from('doctors').select('*');
 
-    if (specialty) query = query.ilike('specialty', `%${specialty}%`);
-    if (location) query = query.ilike('location', `%${location}%`);
+    if (specialty) {
+      query = query.ilike('specialization', `%${specialty}%`);
+    }
+
+    if (location) {
+      // Match against either address or clinic_address
+      query = query.or(`address.ilike.%${location}%,clinic_address.ilike.%${location}%`);
+    }
 
     const { data, error } = await query;
 
@@ -35,16 +41,17 @@ app.post('/input/search', async (req, res) => {
     lastSearchResults = data;
     return res.json({ message: 'Search data stored successfully' });
   } catch (err) {
-    console.error(err);
+    console.error('Unhandled error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /output/search — returns the last result
+// GET /output/search — return cached search result
 app.get('/output/search', (req, res) => {
   res.json({ doctors: lastSearchResults });
 });
 
+// Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
