@@ -28,3 +28,9 @@ __pycache__
 *.sw?
 extracted_data.json
 chat_history.json
+india_medical_centers_20250628_230852_cleaned.csv
+india_medical_centers_20250628_230852.csv
+india_medical_centers_20250628_230852.json
+india_medical_centers_stats_20250628_230852.json
+scrapper_1_cleaner.py
+scrapper_1.py
