@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowUp, Calendar, Clock, MapPin, User, Search } from "lucide-react";
+import { useUserData } from '@/hooks/useUserData';
+
 
 
 
@@ -34,12 +36,47 @@ const AppointmentBooking = () => {
   const [searchLocation, setSearchLocation] = useState("");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
-
+  
   const SERVER_BASE_URL = "http://localhost:4000"; // update accordingly
-
+  const { userId } = useUserData();
+  const patientId = userId; // Replace with actual logged-in user ID
+  
   const specialties = [
     "Cardiology", "Neurology", "Dermatology", "Orthopedics", "Pediatrics", "Psychiatry"
   ];
+
+
+  const bookAppointment = async (doctorId: string) => {
+
+    const payload = {
+      doctor_id: doctorId,
+      patient_id: patientId,
+      appointment_date: new Date().toISOString().split("T")[0], // today
+      appointment_time: "10:00:00", // default time
+      status: "Scheduled",
+      reason: "General Checkup", // replace with user input later
+      notes: "",
+    };
+
+    try {
+      const response = await fetch(`${SERVER_BASE_URL}/appointments/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Appointment booked successfully!");
+      } else {
+        alert(`Failed to book: ${result.error}`);
+      }
+    } catch (err) {
+      console.error("Booking failed:", err);
+      alert("Something went wrong.");
+    }
+  };
+
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -82,9 +119,9 @@ const AppointmentBooking = () => {
             <h1 className="text-3xl font-bold text-gray-900">Smart Appointment Scheduling</h1>
             <p className="text-gray-600 mt-2">Find and book appointments with AI-powered doctor discovery</p>
           </div>
-          <Button variant="outline" 
-          onClick={() => window.location.href = "/"}
-           className="flex items-center space-x-2">
+          <Button variant="outline"
+            onClick={() => window.location.href = "/"}
+            className="flex items-center space-x-2">
             <ArrowUp className="w-4 h-4" />
             <span>Back to Home</span>
           </Button>
@@ -181,10 +218,12 @@ const AppointmentBooking = () => {
                         Available: {doctor.available_days}, {doctor.available_hours}
                       </div>
                     </div>
-                    <Button className="medical-gradient text-white">
+                    <Button className="medical-gradient text-white"
+                      onClick={() => bookAppointment(doctor.id)}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Book Appointment
                     </Button>
+
                   </div>
                 </CardContent>
               </Card>
