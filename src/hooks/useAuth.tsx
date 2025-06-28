@@ -64,11 +64,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error
 
       if (data.user) {
+        // Add the Supabase Auth user ID to the user data
+        const userDataWithAuthId = {
+          ...userData,
+          id: data.user.id // Link the Supabase Auth ID to the custom table
+        }
+
         // Insert user data into appropriate table
         if (userType === 'user') {
-          await userService.createUser(userData as UserRegistrationData)
+          await userService.createUser(userDataWithAuthId as UserRegistrationData)
         } else {
-          await userService.createDoctor(userData as DoctorRegistrationData)
+          await userService.createDoctor(userDataWithAuthId as DoctorRegistrationData)
         }
 
         toast({
