@@ -7,14 +7,18 @@ import {
   Dot,
   Calendar
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserData } from "@/hooks/useUserData";
+import { supabase } from "@/lib/supabase";
+import { userService } from "@/lib/userService";
 
 const formatDateKey = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-const events: Record<string, { label: string; icon: JSX.Element }[]> = {
+const events: Record<string, { label: string; icon: React.ReactElement }[]> = {
   "2025-07-05": [
     { label: "Dr. Anjali Mehta – Dermatology", icon: <CalendarCheck className="w-4 h-4 text-blue-500" /> }
   ],
@@ -84,7 +88,30 @@ const PatientDashboard = () => {
     year: "numeric"
   });
 
+  const { user } = useAuth();
+  const { userData, userId, loading: userLoading } = useUserData();
+
+  // Debug logging
+  console.log("=== PatientDashboard Debug ===");
+  console.log("Supabase Auth User:", user);
+  console.log("Supabase Auth User ID:", user?.id);
+  console.log("UserData from useUserData:", userData);
+  console.log("UserId from useUserData:", userId);
+  console.log("UserLoading:", userLoading);
+  console.log("==============================");
+
   const selectedDayEvents = selectedDate ? events[selectedDate] ?? [] : [];
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 px-4 sm:px-6 lg:px-12">
