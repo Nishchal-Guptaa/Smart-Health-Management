@@ -6,12 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowUp, Search, MapPin, Clock, Hospital, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
-interface TestBookingProps {
-  onClose: () => void;
-}
 
-const TestBooking = ({ onClose }: TestBookingProps) => {
+const TestBooking = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -129,10 +127,10 @@ const TestBooking = ({ onClose }: TestBookingProps) => {
             <h1 className="text-3xl font-bold text-gray-900">Medical Test Booking</h1>
             <p className="text-gray-600 mt-2">Search and book from 1000+ medical tests with transparent pricing</p>
           </div>
-          <Button variant="outline" onClick={onClose} className="flex items-center space-x-2">
+          <Link to="/dashboard/patient" className="flex items-center space-x-2 text-gray-700 hover:underline">
             <ArrowUp className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Button>
+            <span>Back to Dashboard</span>
+          </Link>
         </div>
 
         {/* Search and Filters */}
