@@ -2,10 +2,12 @@ import google.generativeai as genai
 import os
 import json
 from dotenv import load_dotenv
+import os
+
 
 # Load .env
-path = r"C:\Users\...\Projects\Python\.env"
-load_dotenv(path)
+path = r"./.env"
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 # Configure Gemini
 genai.configure(api_key=os.getenv("API_KEY_FP"))
