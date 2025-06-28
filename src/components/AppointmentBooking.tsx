@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowUp, Calendar, Clock, MapPin, User, Search } from "lucide-react";
 
-interface AppointmentBookingProps {
-  onClose: () => void;
-}
+
 
 interface Doctor {
   id: string;
@@ -31,7 +29,7 @@ interface Doctor {
   updated_at: string;
 }
 
-const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
+const AppointmentBooking = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -84,7 +82,9 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
             <h1 className="text-3xl font-bold text-gray-900">Smart Appointment Scheduling</h1>
             <p className="text-gray-600 mt-2">Find and book appointments with AI-powered doctor discovery</p>
           </div>
-          <Button variant="outline" onClick={onClose} className="flex items-center space-x-2">
+          <Button variant="outline" 
+          onClick={() => window.location.href = "/"}
+           className="flex items-center space-x-2">
             <ArrowUp className="w-4 h-4" />
             <span>Back to Home</span>
           </Button>
