@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,9 @@ import {
   Clock, 
   Plus,
   MessageCircle,
-  Hospital
+  Hospital,
+  Menu,
+  X
 } from "lucide-react";
 import HeroSection from "@/components/HeroSection";
 import ModuleCard from "@/components/ModuleCard";
@@ -22,9 +23,11 @@ import AppointmentBooking from "@/components/AppointmentBooking";
 import SymptomChecker from "@/components/SymptomChecker";
 import TestBooking from "@/components/TestBooking";
 import EmergencyServices from "@/components/EmergencyServices";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const modules = [
     {
@@ -69,24 +72,24 @@ const Index = () => {
     }
   ];
 
-  const renderActiveModule = () => {
-    switch (activeModule) {
-      case "appointments":
-        return <AppointmentBooking onClose={() => setActiveModule(null)} />;
-      case "symptom-checker":
-        return <SymptomChecker onClose={() => setActiveModule(null)} />;
-      case "test-booking":
-        return <TestBooking onClose={() => setActiveModule(null)} />;
-      case "emergency":
-        return <EmergencyServices onClose={() => setActiveModule(null)} />;
-      default:
-        return null;
-    }
-  };
+  // const renderActiveModule = () => {
+  //   switch (activeModule) {
+  //     case "appointments":
+  //       return <AppointmentBooking onClose={() => setActiveModule(null)} />;
+  //     case "symptom-checker":
+  //       return <SymptomChecker onClose={() => setActiveModule(null)} />;
+  //     case "test-booking":
+  //       return <TestBooking onClose={() => setActiveModule(null)} />;
+  //     case "emergency":
+  //       return <EmergencyServices onClose={() => setActiveModule(null)} />;
+  //     default:
+  //       return null;
+  //   }
+  // };
 
-  if (activeModule) {
-    return renderActiveModule();
-  }
+  // if (activeModule) {
+  //   return renderActiveModule();
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -102,13 +105,77 @@ const Index = () => {
                 MediFlow
               </span>
             </div>
+            
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-medical-blue transition-colors">Features</a>
               <a href="#about" className="text-gray-600 hover:text-medical-blue transition-colors">About</a>
               <a href="#contact" className="text-gray-600 hover:text-medical-blue transition-colors">Contact</a>
-              <Button className="medical-gradient text-white">Get Started</Button>
+              <Link to="/login" className="text-gray-600 hover:text-medical-blue transition-colors">Login</Link>
+              <Link to="/signup">
+                <Button className="medical-gradient text-white">Get Started</Button>
+              </Link>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
             </div>
           </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden">
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+                <a 
+                  href="#features" 
+                  className="block px-3 py-2 text-gray-600 hover:text-medical-blue transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Features
+                </a>
+                <a 
+                  href="#about" 
+                  className="block px-3 py-2 text-gray-600 hover:text-medical-blue transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  About
+                </a>
+                <a 
+                  href="#contact" 
+                  className="block px-3 py-2 text-gray-600 hover:text-medical-blue transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </a>
+                <Link 
+                  to="/login" 
+                  className="block px-3 py-2 text-gray-600 hover:text-medical-blue transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup" 
+                  className="block px-3 py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button className="w-full medical-gradient text-white">Get Started</Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
