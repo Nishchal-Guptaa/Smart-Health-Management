@@ -11,17 +11,24 @@ interface AppointmentBookingProps {
 }
 
 interface Doctor {
-  id: number;
-  name: string;
-  specialty: string;
-  rating: number;
-  experience: string;
-  fee: string;
-  surge_fee: string;
-  distance: string;
-  next_slot: string;
-  availability: string;
-  image_url: string;
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  date_of_birth: string;
+  gender: string;
+  address: string;
+  specialization: string;
+  license_number: string;
+  years_of_experience: number;
+  hospital_affiliation: string;
+  clinic_address: string;
+  consultation_fee: number;
+  available_days: string;
+  available_hours: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
@@ -30,24 +37,15 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const SERVER_BASE_URL = "http://localhost:4000";
+  const SERVER_BASE_URL = "http://your-server-address:port"; // update accordingly
 
-  const specialties = ["Cardiology", "Neurology", "Dermatology", "Orthopedics", "Pediatrics", "Psychiatry"];
-
-  const getAvailabilityColor = (availability: string) => {
-    switch (availability) {
-      case "high": return "bg-green-100 text-green-700";
-      case "medium": return "bg-yellow-100 text-yellow-700";
-      case "low": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
+  const specialties = [
+    "Cardiology", "Neurology", "Dermatology", "Orthopedics", "Pediatrics", "Psychiatry"
+  ];
 
   const fetchDoctors = async () => {
     setLoading(true);
-
     try {
-      // 1. Send input to /input/search
       await fetch(`${SERVER_BASE_URL}/input/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,10 +55,8 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
         })
       });
 
-      // 2. Fetch output from /output/search
       const response = await fetch(`${SERVER_BASE_URL}/output/search`);
       const data = await response.json();
-
       if (response.ok) {
         setDoctors(data.doctors || []);
       } else {
@@ -94,7 +90,7 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
           </Button>
         </div>
 
-        {/* Search Filters */}
+        {/* Filters */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -112,34 +108,30 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {specialties.map((specialty) => (
-                      <SelectItem key={specialty} value={specialty.toLowerCase()}>
+                      <SelectItem key={specialty} value={specialty}>
                         {specialty}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Location</label>
                 <Input
-                  placeholder="Enter your location"
+                  placeholder="Enter location"
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Sort By</label>
                 <Select disabled>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sort by (coming soon)" />
+                    <SelectValue placeholder="Sort (coming soon)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="distance">Nearest First</SelectItem>
+                    <SelectItem value="experience">Most Experienced</SelectItem>
                     <SelectItem value="fee">Lowest Fee</SelectItem>
-                    <SelectItem value="rating">Highest Rated</SelectItem>
-                    <SelectItem value="availability">Next Available</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -153,81 +145,52 @@ const AppointmentBooking = ({ onClose }: AppointmentBookingProps) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {doctors.map((doctor) => (
-              <Card key={doctor.id} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <Card key={doctor.id} className="hover:shadow-xl transition-all transform hover:-translate-y-1">
                 <CardHeader className="pb-4">
                   <div className="flex items-start space-x-4">
-                    <img
-                      src={doctor.image_url}
-                      alt={doctor.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
+                    <div className="w-16 h-16 rounded-full bg-gray-200 text-center pt-4 font-bold text-gray-500">
+                      {doctor.first_name[0]}{doctor.last_name[0]}
+                    </div>
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{doctor.name}</CardTitle>
-                      <CardDescription>{doctor.specialty}</CardDescription>
+                      <CardTitle className="text-lg">{doctor.first_name} {doctor.last_name}</CardTitle>
+                      <CardDescription>{doctor.specialization}</CardDescription>
                       <div className="flex items-center space-x-2 mt-2">
-                        <Badge variant="secondary">⭐ {doctor.rating}</Badge>
-                        <Badge className={getAvailabilityColor(doctor.availability)}>
-                          {doctor.availability} availability
-                        </Badge>
+                        <Badge variant="secondary">{doctor.gender}</Badge>
+                        <Badge>{doctor.hospital_affiliation}</Badge>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
-
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-sm space-y-1">
                     <div className="flex items-center space-x-2">
                       <User className="w-4 h-4 text-gray-400" />
-                      <span>{doctor.experience}</span>
+                      <span>{doctor.years_of_experience} years experience</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4 text-gray-400" />
-                      <span>{doctor.distance}</span>
+                      <span>{doctor.clinic_address}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between">
+                  <div className="flex justify-between items-center">
                     <div>
-                      <div className="text-lg font-semibold text-gray-900">{doctor.fee}</div>
-                      <div className="text-sm text-red-600">Surge: {doctor.surge_fee}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center space-x-1 text-green-600">
-                        <Clock className="w-4 h-4" />
-                        <span className="text-sm">{doctor.next_slot}</span>
+                      <div className="text-lg font-semibold text-gray-900">
+                        ${doctor.consultation_fee}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Available: {doctor.available_days}, {doctor.available_hours}
                       </div>
                     </div>
+                    <Button className="medical-gradient text-white">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book Appointment
+                    </Button>
                   </div>
-
-                  <Button className="w-full medical-gradient text-white">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Book Appointment
-                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
-
-        {/* AI Features Banner */}
-        <Card className="mt-8 bg-gradient-to-r from-blue-600 to-green-600 text-white">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div>
-                <div className="text-2xl font-bold mb-2">🤖 AI Optimization</div>
-                <p className="text-blue-100">Smart slot prediction based on historical data</p>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-2">💰 Dynamic Pricing</div>
-                <p className="text-blue-100">Real-time fee adjustment based on demand</p>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-2">📱 Smart Reminders</div>
-                <p className="text-blue-100">Automated SMS/email alerts to reduce no-shows</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

@@ -1,26 +1,26 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from fastapi.responses import HTMLResponse
-from app.chatbot import get_response
+from fastapi.middleware.cors import CORSMiddleware
 import os
+from app.chatbot import get_response  # Ensure this path is correct
 
 app = FastAPI()
 
+# Enable CORS so frontend can access API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Use specific domain in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class UserQuery(BaseModel):
     question: str
-    
-@app.get("/", response_class=HTMLResponse)
+
+@app.get("/")
 async def root():
-    return """
-    <html>
-        <head><title>Medical Assistant</title></head>
-        <body>
-            <h2>Medical assistant is running.</h2>
-            <p>👉 Use <strong>POST</strong> to <code>/chat</code> for API access.</p>
-            <p>🧑‍⚕️ <a href="/ui">Click here to open the chat UI</a></p>
-        </body>
-    </html>
-    """
+    return {"message": "Medical assistant backend is running. Use POST /chat to interact."}
 
 @app.on_event("startup")
 async def clear_chat_history_on_reload():
@@ -28,37 +28,6 @@ async def clear_chat_history_on_reload():
     if os.path.exists(history_file):
         os.remove(history_file)
         print(f"Deleted {history_file} on startup.")
-
-@app.get("/ui", response_class=HTMLResponse)
-async def chat_ui():
-    return """
-    <html>
-        <head><title>Medical Assistant Chat</title></head>
-        <body>
-            <h2>Talk to the Medical Assistant</h2>
-            <form id="chatForm">
-                <input type="text" id="question" placeholder="Enter your symptoms..." size="50"/>
-                <button type="submit">Ask</button>
-            </form>
-            <p><strong>Response:</strong></p>
-            <pre id="response"></pre>
-            <script>
-                const form = document.getElementById('chatForm');
-                form.onsubmit = async (e) => {
-                    e.preventDefault();
-                    const question = document.getElementById('question').value;
-                    const response = await fetch('/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ question })
-                    });
-                    const data = await response.json();
-                    document.getElementById('response').innerText = data.response || data.message;
-                };
-            </script>
-        </body>
-    </html>
-    """
 
 @app.post("/chat")
 async def chat_with_bot(query: UserQuery):
