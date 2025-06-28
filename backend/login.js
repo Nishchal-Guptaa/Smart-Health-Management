@@ -56,3 +56,43 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
+
+// POST /appointments/book — book an appointment
+app.post('/appointments/book', async (req, res) => {
+  const {
+    doctor_id,
+    patient_id,
+    appointment_date,
+    appointment_time,
+    status,
+    reason,
+    notes
+  } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert([
+        {
+          doctor_id,
+          patient_id,
+          appointment_date,
+          appointment_time,
+          status,
+          reason,
+          notes
+        }
+      ])
+      .select(); // optional: return inserted record
+
+    if (error) {
+      console.error('Supabase insert error:', error.message);
+      return res.status(500).json({ error: 'Failed to book appointment' });
+    }
+
+    res.status(201).json({ message: 'Appointment booked successfully', appointment: data });
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
