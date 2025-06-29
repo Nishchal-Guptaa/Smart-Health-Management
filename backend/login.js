@@ -72,79 +72,189 @@ app.post('/appointments/book', async (req, res) => {
 
 // ========== VAULT FILE UPLOAD ==========
 app.post('/upload', upload.single('file'), async (req, res) => {
-  const { type, prescribedAt } = req.body;
+  const { type, prescribedAt, userId } = req.body;
   const file = req.file;
 
-  if (!file || !prescribedAt) return res.status(400).json({ error: 'Missing file or timestamp' });
+  if (!file || !prescribedAt || !userId) {
+    return res.status(400).json({ error: 'Missing file, timestamp, or userId' });
+  }
 
-  const extension = path.extname(file.originalname);
-  const storagePath = `${uuidv4()}${extension}`;
-  const buffer = fs.readFileSync(file.path);
+  try {
+    const extension = path.extname(file.originalname);
+    const storagePath = `${uuidv4()}${extension}`;
+    const buffer = fs.readFileSync(file.path);
 
-  const { error: uploadError } = await supabase
-    .storage
-    .from(BUCKET_NAME)
-    .upload(storagePath, buffer, {
-      contentType: file.mimetype,
-      upsert: true
-    });
+    // Upload file to storage
+    const { error: uploadError } = await supabase
+      .storage
+      .from(BUCKET_NAME)
+      .upload(storagePath, buffer, {
+        contentType: file.mimetype,
+        upsert: true
+      });
 
-  if (uploadError) return res.status(500).json({ error: 'Upload failed' });
-  console.log(uploadError)
-  const { error: dbError } = await supabase
-    .from('vault')
-    .insert([{
-      name: file.originalname,
-      type,
-      file_path: storagePath,
-      prescribed_at: new Date(prescribedAt).toISOString()
-    }]);
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      fs.unlinkSync(file.path);
+      return res.status(500).json({ error: `Upload failed: ${uploadError.message}` });
+    }
 
-  fs.unlinkSync(file.path);
-  if (dbError) return res.status(500).json({ error: 'Metadata insert failed' });
+    // Insert metadata into database
+    const { error: dbError } = await supabase
+      .from('vault')
+      .insert([{
+        name: file.originalname,
+        type,
+        file_path: storagePath,
+        prescribed_at: new Date(prescribedAt).toISOString(),
+        user_id: userId
+      }]);
 
-  res.json({ message: 'Uploaded successfully' });
+    // Clean up temp file
+    fs.unlinkSync(file.path);
+
+    if (dbError) {
+      console.error('Database insert error:', dbError);
+      // Try to clean up the uploaded file if database insert fails
+      await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
+      return res.status(500).json({ error: `Metadata insert failed: ${dbError.message}` });
+    }
+
+    res.json({ message: 'Uploaded successfully' });
+  } catch (err) {
+    console.error('Upload error:', err);
+    // Clean up temp file if it exists
+    if (file && file.path) {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (cleanupErr) {
+        console.error('Cleanup error:', cleanupErr);
+      }
+    }
+    res.status(500).json({ error: `Internal server error: ${err.message}` });
+  }
+});
+
+// ========== VAULT FILES BY USER (FOR DOCTOR ACCESS) ==========
+app.get('/files/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from('vault')
+      .select('*')
+      .eq('user_id', userId)
+      .order('prescribed_at', { ascending: false });
+
+    if (error) {
+      console.error('Database fetch error:', error);
+      return res.status(500).json({ error: `Fetch failed: ${error.message}` });
+    }
+
+    // Generate signed URLs for each file
+    const signedUrls = await Promise.all(
+      data.map(async (file) => {
+        try {
+          const { data: signed, error: signedError } = await supabase
+            .storage
+            .from(BUCKET_NAME)
+            .createSignedUrl(file.file_path, 3600);
+
+          if (signedError) {
+            console.error('Signed URL error for file:', file.id, signedError);
+            return { ...file, url: '' };
+          }
+
+          return { ...file, url: signed?.signedUrl || '' };
+        } catch (err) {
+          console.error('Signed URL generation error for file:', file.id, err);
+          return { ...file, url: '' };
+        }
+      })
+    );
+
+    res.json({ files: signedUrls });
+  } catch (err) {
+    console.error('Files fetch error:', err);
+    res.status(500).json({ error: `Internal server error: ${err.message}` });
+  }
 });
 
 // ========== VAULT FILE LIST ==========
 app.get('/files', async (req, res) => {
-  const { data, error } = await supabase
-    .from('vault')
-    .select('*')
-    .order('prescribed_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('vault')
+      .select('*')
+      .order('prescribed_at', { ascending: false });
 
-  if (error) return res.status(500).json({ error: 'Fetch failed' });
+    if (error) {
+      console.error('Database fetch error:', error);
+      return res.status(500).json({ error: `Fetch failed: ${error.message}` });
+    }
 
-  const signedUrls = await Promise.all(
-    data.map(async (file) => {
-      const { data: signed } = await supabase
-        .storage
-        .from(BUCKET_NAME)
-        .createSignedUrl(file.file_path, 3600);
+    // Generate signed URLs for each file
+    const signedUrls = await Promise.all(
+      data.map(async (file) => {
+        try {
+          const { data: signed, error: signedError } = await supabase
+            .storage
+            .from(BUCKET_NAME)
+            .createSignedUrl(file.file_path, 3600);
 
-      return { ...file, url: signed?.signedUrl || '' };
-    })
-  );
+          if (signedError) {
+            console.error('Signed URL error for file:', file.id, signedError);
+            return { ...file, url: '' };
+          }
 
-  res.json({ files: signedUrls });
+          return { ...file, url: signed?.signedUrl || '' };
+        } catch (err) {
+          console.error('Signed URL generation error for file:', file.id, err);
+          return { ...file, url: '' };
+        }
+      })
+    );
+
+    res.json({ files: signedUrls });
+  } catch (err) {
+    console.error('Files fetch error:', err);
+    res.status(500).json({ error: `Internal server error: ${err.message}` });
+  }
 });
 
 // ========== VAULT FILE DELETE ==========
 app.delete('/delete/:id', async (req, res) => {
   const { id } = req.params;
 
-  const { data, error: fetchError } = await supabase
-    .from('vault')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    // Get file info from database
+    const { data, error: fetchError } = await supabase
+      .from('vault')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (fetchError || !data) return res.status(404).json({ error: 'File not found' });
+    if (fetchError || !data) {
+      return res.status(404).json({ error: 'File not found' });
+    }
 
-  await supabase.storage.from(BUCKET_NAME).remove([data.file_path]);
-  await supabase.from('vault').delete().eq('id', id);
+    // Delete from storage
+    const { error: storageError } = await supabase.storage.from(BUCKET_NAME).remove([data.file_path]);
+    if (storageError) {
+      console.error('Storage delete error:', storageError);
+    }
 
-  res.json({ message: 'Deleted successfully' });
+    // Delete from database
+    const { error: deleteError } = await supabase.from('vault').delete().eq('id', id);
+    if (deleteError) {
+      console.error('Database delete error:', deleteError);
+      return res.status(500).json({ error: `Delete failed: ${deleteError.message}` });
+    }
+
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ error: `Internal server error: ${err.message}` });
+  }
 });
 
 

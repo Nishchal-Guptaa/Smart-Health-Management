@@ -45,6 +45,9 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [vaultModalUserId, setVaultModalUserId] = useState<string | null>(null);
+  const [vaultFiles, setVaultFiles] = useState<any[]>([]);
+  const [vaultLoading, setVaultLoading] = useState(false);
 
   // Fetch doctor id after auth loads
   useEffect(() => {
@@ -151,6 +154,24 @@ const DoctorDashboard = () => {
     } else {
       toast({ title: 'Success', description: `Appointment ${status === 'completed' ? 'accepted' : 'rejected'}.` });
       setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    }
+  };
+
+  const fetchUserVaultFiles = async (userId: string) => {
+    setVaultLoading(true);
+    try {
+      const res = await fetch(`http://localhost:4000/files/user/${userId}`);
+      const data = await res.json();
+      setVaultFiles(
+        (data.files || []).map((file: any) => ({
+          ...file,
+          prescribedAt: file.prescribed_at,
+        }))
+      );
+    } catch (err) {
+      setVaultFiles([]);
+    } finally {
+      setVaultLoading(false);
     }
   };
 
@@ -332,6 +353,17 @@ const DoctorDashboard = () => {
                             >
                               {actionLoadingId === appt.id ? 'Rejecting...' : 'Reject'}
                             </button>
+                            <button
+                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition disabled:opacity-50"
+                              onClick={() => {
+                                if (patient?.id) {
+                                  setVaultModalUserId(patient.id);
+                                  fetchUserVaultFiles(patient.id);
+                                }
+                              }}
+                            >
+                              View Vault
+                            </button>
                           </div>
                         </div>
                       );
@@ -372,15 +404,26 @@ const DoctorDashboard = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="text-gray-700 mb-1">
-                            <span className="font-semibold">Reason:</span> {appt.reason || '-'}
-                          </div>
+                        
                           {appt.notes && (
                             <div className="text-gray-500 text-sm">
                               <span className="font-semibold">Notes:</span> {appt.notes}
                             </div>
                           )}
                           <span className="mt-2 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 self-start">Confirmed</span>
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition disabled:opacity-50"
+                              onClick={() => {
+                                if (patient?.id) {
+                                  setVaultModalUserId(patient.id);
+                                  fetchUserVaultFiles(patient.id);
+                                }
+                              }}
+                            >
+                              View Vault
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -402,6 +445,48 @@ const DoctorDashboard = () => {
         </div>
 
       </div>
+      {vaultModalUserId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              onClick={() => setVaultModalUserId(null)}
+            >
+              Close
+            </button>
+            <h2 className="text-xl font-bold mb-4">User Medical History </h2>
+            {vaultLoading ? (
+              <p>Loading files...</p>
+            ) : vaultFiles.length === 0 ? (
+              <p>No files found for this user.</p>
+            ) : (
+              <div className="space-y-4">
+                {vaultFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex justify-between items-center p-3 rounded border hover:shadow-sm"
+                  >
+                    <div>
+                      <p className="font-medium">{file.name}</p>
+                      <p className="text-sm text-gray-500">
+                        Type: {file.type} | Prescribed: {file.prescribedAt ? new Date(file.prescribedAt).toLocaleString() : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => window.open(file.url, "_blank")}
+                        className="inline-block px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
+                        View
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
