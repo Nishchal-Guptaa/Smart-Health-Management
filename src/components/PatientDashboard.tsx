@@ -64,7 +64,7 @@ const coreModules = [
     title: "Digital Medical Vault",
     icon: HeartHandshake,
     color: "bg-yellow-500",
-    path: "/medical-vault"
+    path: "/Vault"
   },
   {
     title: "Emergency e-Ambulance",

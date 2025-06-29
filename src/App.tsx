@@ -15,6 +15,7 @@ import AppointmentBooking from "@/components/AppointmentBooking";
 import SymptomChecker from "@/components/SymptomChecker";
 import TestBooking from "@/components/TestBooking";
 import EmergencyServices from "@/components/EmergencyServices";
+import  Vault from "@/components/Vault"; // Ensure this is the correct import path for your Vault component
 
 const queryClient = new QueryClient();
 
@@ -34,9 +35,9 @@ const App = () => (
             <Route path="/dashboard/doctor" element={<DoctorDashboard />} />
             <Route path="/appointments" element={<AppointmentBooking />} />
             <Route path="/symptom-checker" element={<SymptomChecker />} />
-<Route path="/test-booking" element={<TestBooking />} />
-<Route path="/ambulance" element={<EmergencyServices />} />
-
+            <Route path="/test-booking" element={<TestBooking />} />
+            <Route path="/ambulance" element={<EmergencyServices />} />
+            <Route path="/vault" element={< Vault/>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
