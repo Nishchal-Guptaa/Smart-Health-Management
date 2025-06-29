@@ -1,4 +1,5 @@
 "use client";
+import { useNavigate } from "react-router-dom";
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  FileText,
 } from "lucide-react";
+import { Navigate } from "react-router-dom";
 
 interface ChatMessage {
   id: number;
@@ -26,17 +29,22 @@ interface ChatMessage {
 }
 
 const SymptomChecker = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([{
-    id: 1,
-    type: "bot",
-    message:
-      "Hello! I'm your AI health assistant. I can help you understand your symptoms and provide preliminary guidance. Please describe what you're experiencing.",
-    timestamp: "Just now",
-  }]);
+    const navigate = useNavigate();
+  
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      type: "bot",
+      message:
+        "Hello! I'm your AI health assistant. I can help you understand your symptoms and provide preliminary guidance. Please describe what you're experiencing.",
+      timestamp: "Just now",
+    },
+  ]);
 
   const [inputMessage, setInputMessage] = useState("");
   const [currentStep, setCurrentStep] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const urgencyLevels = [
     {
@@ -69,6 +77,19 @@ const SymptomChecker = () => {
     { name: "Chest X-Ray", price: "$120" },
   ];
 
+  const addBotMessage = (text: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        type: "bot",
+        message: text,
+        timestamp: "Just now",
+      },
+    ]);
+    setCurrentStep((prev) => prev + 1);
+  };
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
@@ -90,35 +111,51 @@ const SymptomChecker = () => {
       });
 
       const data = await response.json();
-
-      const botResponse: ChatMessage = {
-        id: messages.length + 2,
-        type: "bot",
-        message:
-          data.response ||
-          data.message ||
-          "I'm having trouble responding right now.",
-        timestamp: "Just now",
-      };
-
-      setMessages((prev) => [...prev, botResponse]);
-      setCurrentStep((prev) => prev + 1);
+      addBotMessage(data.response || data.message || "Something went wrong.");
     } catch (error) {
-      console.error("Error talking to backend:", error);
-      const errorResponse: ChatMessage = {
-        id: messages.length + 2,
-        type: "bot",
-        message:
-          "There was a problem reaching the assistant. Please try again later.",
+      console.error("Chat error:", error);
+      addBotMessage("There was a problem reaching the assistant.");
+    }
+  };
+
+  const handlePdfUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // User message: uploaded file
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        type: "user",
+        message: `📄 Uploaded medical report: ${file.name}`,
         timestamp: "Just now",
-      };
-      setMessages((prev) => [...prev, errorResponse]);
+      },
+    ]);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:8000/analyze-report", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      const summary = data.ai_analysis || "No insights available from the report.";
+      addBotMessage(`📄 Report Summary:\n\n${summary}`);
+    } catch (error) {
+      console.error("PDF upload error:", error);
+      addBotMessage("❌ Failed to analyze the PDF. Please try again.");
     }
   };
 
   useEffect(() => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      scrollContainerRef.current.scrollTop =
+        scrollContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -127,9 +164,12 @@ const SymptomChecker = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">AI Symptom Checker</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              AI Symptom Checker
+            </h1>
             <p className="text-gray-600 mt-2">
-              Get preliminary diagnosis and health guidance from our AI assistant
+              Get preliminary diagnosis and health guidance from our AI
+              assistant
             </p>
           </div>
           <Button
@@ -151,7 +191,7 @@ const SymptomChecker = () => {
                   <span>Health Assistant Chat</span>
                 </CardTitle>
                 <CardDescription>
-                  Describe your symptoms and I’ll help assess your condition.
+                  Describe your symptoms or upload a medical report.
                 </CardDescription>
               </CardHeader>
 
@@ -171,7 +211,7 @@ const SymptomChecker = () => {
                         }`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg whitespace-pre-wrap ${
                             message.type === "user"
                               ? "bg-blue-600 text-white"
                               : "bg-gray-100 text-gray-900"
@@ -193,7 +233,7 @@ const SymptomChecker = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2 items-end mt-2">
+                <div className="flex gap-2 items-center mt-2">
                   <textarea
                     placeholder="Describe your symptoms..."
                     value={inputMessage}
@@ -207,100 +247,39 @@ const SymptomChecker = () => {
                     }}
                     className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                   />
-                  <Button
-                    onClick={handleSendMessage}
-                    className="medical-gradient text-white h-10"
-                  >
+                  <Button onClick={handleSendMessage} className="h-10">
                     Send
                   </Button>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handlePdfUpload}
+                      accept=".pdf"
+                      className="hidden"
+                    />
+                    <FileText className="w-6 h-6 text-gray-500 hover:text-blue-600" />
+                  </label>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Current Assessment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {currentStep > 2 ? (
-                  <div className="space-y-3">
-                    {urgencyLevels.map((level, index) => (
-                      <div
-                        key={level.level}
-                        className={`p-3 rounded-lg ${level.bgColor} ${
-                          index === 2 ? "ring-2 ring-green-300" : ""
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <level.icon className={`w-4 h-4 ${level.textColor}`} />
-                          <span className={`font-medium ${level.textColor}`}>
-                            {level.level}
-                          </span>
-                          {index === 2 && (
-                            <Badge className="bg-green-600 text-white">
-                              Current
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {level.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Continue chatting to receive your assessment</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {currentStep > 2 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Recommended Tests</CardTitle>
-                  <CardDescription>
-                    Based on your symptoms, these tests might be helpful
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recommendedTests.map((test, index) => (
-                      <div
-                        key={index}
-                        className="p-3 border rounded-lg hover:bg-gray-50"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium text-sm">{test.name}</h4>
-                          <Badge variant="outline">{test.price}</Badge>
-                        </div>
-                        <Button size="sm" className="w-full" variant="outline">
-                          Book Test
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full" variant="outline">
+                <Button className="w-full" variant="outline" onClick={() => navigate("/ambulance")}>
                   🎉 Emergency Services
                 </Button>
-                <Button className="w-full" variant="outline">
+                <Button className="w-full" variant="outline"  onClick={() => navigate("/appointments")}>
                   🗓 Book Appointment
                 </Button>
-                <Button className="w-full" variant="outline">
-                  🏥 Find Nearby Hospitals
+                <Button className="w-full" variant="outline"  onClick={() => navigate("/test-booking")}>
+                  🏥 Find Nearby labs
                 </Button>
               </CardContent>
             </Card>
