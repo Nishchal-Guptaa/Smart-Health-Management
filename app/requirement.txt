@@ -24,7 +24,6 @@ et_xmlfile==2.0.0
 etelemetry==0.3.1
 fastapi==0.115.14
 filelock==3.18.0
-fitz==0.0.1.dev2
 frozenlist==1.7.0
 google-ai-generativelanguage==0.6.15
 google-api-core==2.25.1
@@ -73,7 +72,7 @@ pdfplumber==0.11.7
 pillow==11.2.1
 propcache==0.3.2
 proto-plus==1.26.1
-protobuf==5.29.5
+protobuf==4.23.3
 prov==2.1.1
 puremagic==1.29
 py==1.11.0
