@@ -67,7 +67,7 @@ const coreModules = [
     path: "/Vault"
   },
   {
-    title: "Emergency e-Ambulance",
+    title: "Emergency Services",
     icon: Calendar,
     color: "bg-red-500",
     path: "/ambulance"

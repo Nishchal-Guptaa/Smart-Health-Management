@@ -10,5 +10,17 @@
     "parts": [
       "Hello! I'm here to help you understand your symptoms, lab reports, or medical documents. How can I assist you today?\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
     ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It looks like the clinical note you uploaded is empty or contains no information in the specified fields. To help you, please provide the content of the clinical note within the fields (Chief Complaint, History of Present Illness, Past Medical History, Assessment, Plan).\n\nOnce you provide the details, I can help summarize the patient's condition, highlight key medical concerns, and suggest general actions you might consider.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
   }
 ]

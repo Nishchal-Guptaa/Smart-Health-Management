@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Search } from "lucide-react";
+import { supabase } from "@/lib/supabase"; // Adjust path as needed
 
 // Make sure these custom colors are defined in your tailwind.config.js
 // extend: {
@@ -39,140 +40,6 @@ const specialties = [
   "Genetics",
 ];
 
-const mockTests = [
-  {
-    id: "1",
-    test_name: "Complete Blood Count",
-    category: "Pathology",
-    lab_name: "HealthPlus Labs",
-    fee: 500,
-    distance_km: 2.5,
-    experience_years: 10,
-    location: "New Delhi",
-    available_days: "Mon-Fri",
-    available_hours: "9 AM - 5 PM",
-  },
-  {
-    id: "2",
-    test_name: "MRI Scan",
-    category: "Radiology",
-    lab_name: "ScanPro Diagnostics",
-    fee: 3000,
-    distance_km: 6.2,
-    experience_years: 8,
-    location: "Gurgaon",
-    available_days: "Mon-Sat",
-    available_hours: "10 AM - 6 PM",
-  },
-  {
-    id: "3",
-    test_name: "X-Ray Chest",
-    category: "Radiology",
-    lab_name: "Care Imaging Center",
-    fee: 800,
-    distance_km: 4.1,
-    experience_years: 6,
-    location: "Noida",
-    available_days: "Tue-Sun",
-    available_hours: "8 AM - 2 PM",
-  },
-  {
-    id: "4",
-    test_name: "Thyroid Profile",
-    category: "Biochemistry",
-    lab_name: "ThyroCare",
-    fee: 600,
-    distance_km: 3.3,
-    experience_years: 12,
-    location: "Faridabad",
-    available_days: "Mon-Sat",
-    available_hours: "9 AM - 7 PM",
-  },
-  {
-    id: "5",
-    test_name: "Liver Function Test",
-    category: "Biochemistry",
-    lab_name: "MedLife Labs",
-    fee: 850,
-    distance_km: 1.7,
-    experience_years: 9,
-    location: "New Delhi",
-    available_days: "Mon-Fri",
-    available_hours: "10 AM - 4 PM",
-  },
-  {
-    id: "6",
-    test_name: "Vitamin D Test",
-    category: "Biochemistry",
-    lab_name: "Dr. Lal PathLabs",
-    fee: 1100,
-    distance_km: 5.8,
-    experience_years: 11,
-    location: "Ghaziabad",
-    available_days: "Mon-Sat",
-    available_hours: "9 AM - 1 PM",
-  },
-  {
-    id: "7",
-    test_name: "Blood Sugar Test",
-    category: "Pathology",
-    lab_name: "Apollo Diagnostics",
-    fee: 250,
-    distance_km: 2.0,
-    experience_years: 5,
-    location: "Noida",
-    available_days: "All Days",
-    available_hours: "8 AM - 8 PM",
-  },
-  {
-    id: "8",
-    test_name: "CT Scan Abdomen",
-    category: "Radiology",
-    lab_name: "City Scan Center",
-    fee: 4500,
-    distance_km: 7.1,
-    experience_years: 14,
-    location: "Delhi NCR",
-    available_days: "Mon-Sun",
-    available_hours: "9 AM - 6 PM",
-  },
-  {
-    id: "9",
-    test_name: "Urine Routine Test",
-    category: "Microbiology",
-    lab_name: "SmartLab Diagnostics",
-    fee: 300,
-    distance_km: 3.5,
-    experience_years: 4,
-    location: "Gurgaon",
-    available_days: "Mon-Fri",
-    available_hours: "7 AM - 11 AM",
-  },
-  {
-    id: "10",
-    test_name: "HbA1c Test",
-    category: "Genetics",
-    lab_name: "SugarTrack Labs",
-    fee: 750,
-    distance_km: 4.9,
-    experience_years: 7,
-    location: "Faridabad",
-    available_days: "Mon-Sat",
-    available_hours: "9 AM - 5 PM",
-  },
-  {
-    id: "11",
-    test_name: "COVID-19 RTPCR",
-    category: "Microbiology",
-    lab_name: "PathSure",
-    fee: 1200,
-    distance_km: 6.7,
-    experience_years: 6,
-    location: "New Delhi",
-    available_days: "All Days",
-    available_hours: "7 AM - 7 PM",
-  },
-];
 
 export default function BookTest() {
   const [location, setLocation] = useState("");
@@ -181,46 +48,67 @@ export default function BookTest() {
   const [filteredTests, setFilteredTests] = useState([]);
 
   useEffect(() => {
-    let filtered = [...mockTests];
+  const fetchData = async () => {
+    let query = supabase.from("diagnostics_centers").select("*");
 
     if (selectedSpecialty) {
-      filtered = filtered.filter(
-        (test) =>
-          test.category.toLowerCase() === selectedSpecialty.toLowerCase()
-      );
+      query = query.ilike("services", `%${selectedSpecialty}%`);
     }
 
     if (location) {
-      filtered = filtered.filter((test) =>
-        test.location.toLowerCase().includes(location.toLowerCase())
-      );
+      query = query.ilike("location", `%${location}%`);
     }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Supabase error:", error);
+      setFilteredTests([]);
+      return;
+    }
+
+    const transformed = (data || []).map((row, index) => ({
+      id: row.id.toString(),
+      test_name: row.name,
+      category: row.services?.split(";")[0] || "General", // pick first service or fallback
+      lab_name: row.name,
+      fee: Math.floor(300 + Math.random() * 2000), // mock fee for now
+      distance_km: Math.random() * 10, // mock distance
+      experience_years: Math.floor(Math.random() * 15 + 1), // mock experience
+      location: row.location,
+      available_days: "Mon-Sat", // placeholder
+      available_hours: "9 AM - 5 PM", // placeholder
+    }));
+
+    let sorted = [...transformed];
 
     switch (sortBy) {
       case "price-asc":
-        filtered.sort((a, b) => a.fee - b.fee);
+        sorted.sort((a, b) => a.fee - b.fee);
         break;
       case "price-desc":
-        filtered.sort((a, b) => b.fee - a.fee);
+        sorted.sort((a, b) => b.fee - a.fee);
         break;
       case "distance-asc":
-        filtered.sort((a, b) => a.distance_km - b.distance_km);
+        sorted.sort((a, b) => a.distance_km - b.distance_km);
         break;
       case "distance-desc":
-        filtered.sort((a, b) => b.distance_km - a.distance_km);
+        sorted.sort((a, b) => b.distance_km - a.distance_km);
         break;
       case "experience-asc":
-        filtered.sort((a, b) => a.experience_years - b.experience_years);
+        sorted.sort((a, b) => a.experience_years - b.experience_years);
         break;
       case "experience-desc":
-        filtered.sort((a, b) => b.experience_years - a.experience_years);
-        break;
-      default:
+        sorted.sort((a, b) => b.experience_years - a.experience_years);
         break;
     }
 
-    setFilteredTests(filtered);
-  }, [location, selectedSpecialty, sortBy]);
+    setFilteredTests(sorted);
+  };
+
+  fetchData();
+}, [location, selectedSpecialty, sortBy]);
+
 
   const resetFilters = () => {
     setLocation("");
