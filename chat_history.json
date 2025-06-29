@@ -10,5 +10,101 @@
     "parts": [
       "Hello! I'm here to help you understand your symptoms, lab reports, or medical documents. How can I assist you today?\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
     ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It looks like the clinical note you uploaded is empty or contains no information in the specified fields. To help you, please provide the content of the clinical note within the fields (Chief Complaint, History of Present Illness, Past Medical History, Assessment, Plan).\n\nOnce you provide the details, I can help summarize the patient's condition, highlight key medical concerns, and suggest general actions you might consider.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It looks like the clinical note you uploaded is still empty or contains no information within the specified fields. I need the actual content in the \"Chief Complaint,\" \"History of Present Illness,\" \"Past Medical History,\" \"Assessment,\" and \"Plan\" sections to be able to analyze and summarize the patient's condition for you.\n\nPlease provide the details within those fields, and I will be happy to help.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It appears the clinical note you've provided is still empty. For me to help you, I need the actual text or details filled into the following sections:\n\n*   **Chief Complaint**\n*   **History of Present Illness**\n*   **Past Medical History**\n*   **Assessment**\n*   **Plan**\n\nOnce you provide the content within these fields, I can summarize the patient's condition, highlight key medical concerns, and suggest general actions.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It looks like the clinical note you've provided is still empty. I need the actual content within the \"Chief Complaint,\" \"History of Present Illness,\" \"Past Medical History,\" \"Assessment,\" and \"Plan\" sections to be able to analyze and summarize the patient's condition for you.\n\nPlease fill in the details within those fields, and I will be happy to assist.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "Here is a patient's lab report in JSON format:\n\n{\n  \"B.Tech\": \"2023-\\n2027\",\n  \"CBSE\": \"2020\"\n}\n\nPlease analyze it and summarize any abnormal values, concerns, or conditions it may suggest."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It looks like the information you've provided, \"B.Tech\" and \"CBSE\", pertains to educational qualifications rather than medical lab report values. I am designed to assist only with medical-related questions, such as analyzing actual lab results to help you understand them.\n\nI cannot analyze academic or non-medical information. If you have a medical lab report you'd like me to review, please provide the relevant medical data from that report.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It appears the clinical note you've provided is still empty. For me to help you, I need the actual text or details filled into the following sections:\n\n*   **Chief Complaint**\n*   **History of Present Illness**\n*   **Past Medical History**\n*   **Assessment**\n*   **Plan**\n\nOnce you provide the content within these fields, I can summarize the patient's condition, highlight key medical concerns, and suggest general actions.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It seems the clinical note you've provided is still empty. To help you summarize the patient's condition, highlight key medical concerns, and suggest general actions, I need the actual content filled into these sections:\n\n*   **Chief Complaint:** What brought the patient in?\n*   **History of Present Illness:** Details about the current symptoms.\n*   **Past Medical History:** Any previous health conditions.\n*   **Assessment:** The healthcare provider's evaluation or diagnosis.\n*   **Plan:** The proposed treatment or next steps.\n\nPlease provide the details within these fields, and I'll be happy to assist you.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      "I have uploaded a clinical note. Please analyze the following:\n\n{\n  \"Chief Complaint\": \"\",\n  \"History of Present Illness\": \"\",\n  \"Past Medical History\": \"\",\n  \"Assessment\": \"\",\n  \"Plan\": \"\"\n}\n\nSummarize the patient's condition, key concerns, and suggest general advice."
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      "It seems the clinical note you've provided is still empty. To help you summarize the patient's condition, highlight key medical concerns, and suggest general actions, I need the actual content filled into these sections:\n\n*   **Chief Complaint:** What brought the patient in?\n*   **History of Present Illness:** Details about the current symptoms.\n*   **Past Medical History:** Any previous health conditions.\n*   **Assessment:** The healthcare provider's evaluation or diagnosis.\n*   **Plan:** The proposed treatment or next steps.\n\nPlease provide the details within these fields, and I'll be happy to assist you.\n\nThis information is not a substitute for professional medical advice. Always consult a healthcare provider for personalized care.\n\nIs there anything else you'd like me to help you understand?"
+    ]
   }
 ]
